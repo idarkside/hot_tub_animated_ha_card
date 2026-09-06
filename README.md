@@ -32,19 +32,19 @@ These are genuine SVG files containing their own CSS animations. The Home Assist
 
 ### Pump OFF
 
-<img src="svg/pump-off.svg" alt="Pump OFF" width="136">
+<img src="svg/pump-off.svg" alt="Pump OFF" width="204">
 
 Completely still with the lighting and water effects disabled.
 
 ### Pump LOW
 
-<img src="svg/pump-low.svg" alt="Pump LOW" width="136">
+<img src="svg/pump-low.svg" alt="Pump LOW" width="204">
 
 Gentle water movement with blue lighting and slower ripple effects.
 
 ### Pump HIGH
 
-<img src="svg/pump-high.svg" alt="Pump HIGH" width="136">
+<img src="svg/pump-high.svg" alt="Pump HIGH" width="204">
 
 Fast water movement, synchronised colour-changing LEDs and dense bubbles.
 

@@ -1,6 +1,6 @@
 # Hot Tub Animated Home Assistant Card
 
-A custom Home Assistant Lovelace card for an animated hot tub visual, built with inline HTML, CSS and SVG. No external or raster images are used by the card.
+A custom Home Assistant Lovelace card for an animated hot tub visual, built with inline HTML, CSS and SVG. No external or raster images are used by the card itself.
 
 ## Features
 
@@ -8,59 +8,61 @@ A custom Home Assistant Lovelace card for an animated hot tub visual, built with
 - Pump OFF mode: completely still, with animation and lights disabled
 - Pump LOW mode: gentle water movement, ripples and blue lighting
 - Pump HIGH mode: faster water movement, dense internal bubbles and synchronised colour-changing LEDs
-- Bubbles are clipped to the inside of the tub so they do not appear outside the shell
-- Bubble movement varies in direction and originates from the corners and other internal areas
+- Bubbles stay clipped inside the tub shell
+- Bubble sources are distributed around the tub, including the corners
 - Responsive Lovelace card layout
-- Uses Home Assistant entity state to control the animation
+- Uses a Home Assistant pump entity to control the animation
 - No iframe and no external image dependency
 
 ## Screenshots
 
 ### Pump OFF
 
-The tub is completely still with the lighting and water effects disabled.
+![Pump OFF](images/pump-off.svg)
 
-> Screenshot coming from the live Home Assistant card.
+Completely still with the lighting and water effects disabled.
 
 ### Pump LOW
 
-Gentle water movement with blue lighting and slower ripple effects.
+![Pump LOW](images/pump-low.svg)
 
-> Screenshot coming from the live Home Assistant card.
+Gentle water movement with blue lighting and slower ripple effects.
 
 ### Pump HIGH
 
-Fast water movement, synchronised colour-changing LEDs and dense bubbles moving throughout the water.
+![Pump HIGH](images/pump-high.svg)
 
-> Screenshot coming from the live Home Assistant card.
+Fast water movement, synchronised colour-changing LEDs and dense bubbles.
+
+> The screenshot files are static documentation images; the card itself remains fully animated in Home Assistant.
 
 ## Installation
 
-### Option 1 — HACS
+### HACS — Custom Repository
 
-The card can be added to HACS as a custom repository until it is available through the normal HACS store.
+Until the card is available through the normal HACS store, add this repository as a custom repository:
 
 1. Open **HACS** in Home Assistant.
 2. Go to **Frontend**.
-3. Open the three-dot menu in the top-right.
+3. Open the **⋮** menu in the top-right.
 4. Select **Custom repositories**.
 5. Enter:
 
    `https://github.com/idarkside/hot_tub_animated_ha_card`
 
-6. Select **Lovelace** as the repository category.
+6. Select **Lovelace** as the category.
 7. Click **Add**.
-8. Find **Hot Tub Animated HA Card** in HACS and install it.
+8. Find **Hot Tub Animated Card** and install it.
 9. Restart Home Assistant if requested.
 10. Add the card to your dashboard using the configuration below.
 
-### Option 2 — Manual installation
+### Manual installation
 
 Download `hot-tub-animated-ha-card.js` and place it in:
 
 `/config/www/`
 
-Then add the resource under **Settings → Dashboards → Resources**:
+Then add it under **Settings → Dashboards → Resources**:
 
 ```yaml
 resources:
@@ -70,27 +72,21 @@ resources:
 
 ## Configuration
 
-Add the card to a dashboard with:
-
 ```yaml
 type: custom:hot-tub-animated-ha-card
 title: Hot Tub
 pump_entity: switch.example_hot_tub_pump
-light_entity: light.example_hot_tub_lights
 ```
 
-### Configuration options
+### Options
 
 | Option | Required | Description |
 |---|---|---|
-| `type` | Yes | Must be `custom:hot-tub-animated-ha-card` |
-| `title` | No | Title displayed at the top of the card. |
-| `pump_entity` | Yes | Home Assistant entity used to determine the pump animation state. |
-| `light_entity` | No | Reserved for the hot tub light entity. |
+| `type` | Yes | `custom:hot-tub-animated-ha-card` |
+| `title` | No | Title displayed at the top of the card. Defaults to `Hot Tub`. |
+| `pump_entity` | Yes | Home Assistant entity whose state controls the animation. |
 
-### Pump state mapping
-
-The card interprets the pump entity as follows:
+## Pump state mapping
 
 | Entity state | Animation |
 |---|---|
@@ -100,7 +96,7 @@ The card interprets the pump entity as follows:
 
 ## Updating
 
-If installed through HACS, use **HACS → Frontend → Hot Tub Animated HA Card → Update** when a new version is released.
+If installed through HACS, use **HACS → Frontend → Hot Tub Animated Card → Update** when a new version is released.
 
 After updating, clear the browser cache or perform a hard refresh if Home Assistant continues displaying the previous JavaScript version.
 

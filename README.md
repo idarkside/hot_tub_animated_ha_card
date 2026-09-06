@@ -2,7 +2,7 @@
 
 A custom Home Assistant Lovelace card for an animated hot tub visual, built with HTML, CSS and animated SVG. No raster images are used by the card.
 
-[![Add to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=idarkside&repository=hot_tub_animated_ha_card&category=dashboard)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration) [![Open HACS Repository](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=idarkside&repository=hot_tub_animated_ha_card&category=dashboard)
 
 ## Features
 
@@ -54,7 +54,7 @@ Fast water movement, synchronised colour-changing LEDs and dense bubbles.
 
 ### Add with HACS
 
-Use the button above to open the repository directly in HACS.
+Use the **Open HACS Repository** button above to open the repository directly in HACS.
 
 If the button is not available, add the repository manually:
 

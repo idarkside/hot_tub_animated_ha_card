@@ -2,7 +2,7 @@
 const CSS=`:host{display:block}ha-card{padding:0}.card{padding:14px;border-radius:22px;background:linear-gradient(#fafbfd,#edf1f6);box-shadow:0 18px 45px #75829733;border:1px solid #dfe4ea}.head{display:flex;align-items:center;gap:9px;height:30px}.icon{width:26px;height:26px;border-radius:8px;background:#fff;border:1px solid #e0e6ed;display:grid;place-items:center;color:#4b91d1}.title{font-size:14px;font-weight:750;flex:1}.dot{width:7px;height:7px;border-radius:50%;background:#9aa3ad}.dot.low{background:#4b9eea;box-shadow:0 0 8px #4b9eea88}.dot.high{background:#67d6ff;box-shadow:0 0 10px #67d6ff99}.art{height:245px;display:grid;place-items:center}.spa{width:272px;height:214px}.spa img{width:100%;height:100%;display:block}.state{font-size:12px;color:#5b6673;margin-top:2px}.activities{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:10px}.activity{display:flex;align-items:center;gap:7px;min-height:34px;padding:6px 9px;border-radius:11px;background:#fff9;border:1px solid #e1e6ec;font-size:11px}.activity .aicon{width:19px;text-align:center;font-size:14px}.activity .aname{flex:1;color:#586472}.activity .avalue{font-weight:700;color:#303943}.activity.active{border-color:#8ec7ef;background:#f4fbff}.activity.active .avalue{color:#2588cb}.temps{display:flex;gap:8px;margin-top:9px}.temp{flex:1;padding:7px 9px;border-radius:11px;background:#fff9;border:1px solid #e1e6ec}.temp .label{font-size:10px;color:#687482}.temp .value{font-size:14px;font-weight:750;color:#303943;margin-top:2px}`;
 
 class HotTubCard extends HTMLElement{
- constructor(){super();this.attachShadow({mode:'open'});this._unsub=null;this._state='off';this._imgSrc=null;this._hass=null}
+ constructor(){super();this.attachShadow({mode:'open'});this._unsubPromise=null;this._subscribing=false;this._state='off';this._imgSrc=null;this._hass=null}
 
  static getConfigForm(){return{schema:[
   {name:'title',selector:{text:{}}},
@@ -27,13 +27,14 @@ class HotTubCard extends HTMLElement{
 
  static getStubConfig(){return{title:'Hot Tub',pump_entity:'fan.my_spa_pump_1',temperature_entity:'sensor.my_spa_current_temperature',target_temperature_entity:'sensor.my_spa_target_temperature',heating_entity:'binary_sensor.my_spa_heating',ozone_entity:'binary_sensor.my_spa_ozone',circulating_pump_entity:'binary_sensor.my_spa_circulating_pump',spa_in_use_entity:'binary_sensor.my_spa_spa_in_use',filter_clean_entity:'binary_sensor.my_spa_filter_status_clean',filter_purge_entity:'binary_sensor.my_spa_filter_status_purge',light_entity:'light.my_spa_lights',status_entity:'sensor.my_spa_status',show_activities:true,show_temperature:true}}
 
- setConfig(c={}){this.config={title:'Hot Tub',pump_entity:'fan.my_spa_pump_1',show_activities:true,show_temperature:true,...c};this.render();this.subscribe()}
+ setConfig(c={}){this.config={title:'Hot Tub',pump_entity:'fan.my_spa_pump_1',show_activities:true,show_temperature:true,...(c&&typeof c==='object'?c:{})};this.render();this._restartSubscription()}
  getCardSize(){return this.config?.show_activities?6:4}
  getGridOptions(){return{rows:this.config?.show_activities?6:4,columns:6,min_rows:4,max_rows:8}}
- disconnectedCallback(){this._unsub?.();this._unsub=null}
- set hass(v){this._hass=v;if(this.config)this.subscribe()}
+ disconnectedCallback(){this._unsubscribe()}
+ set hass(v){this._hass=v;if(this.config&&!this._unsubPromise&&!this._subscribing)this._restartSubscription();else this.updateFromHass()}
 
- subscribe(){this._unsub?.();this._unsub=null;if(!this._hass||!this.config?.pump_entity)return;const ids=new Set(Object.keys(this.config).filter(k=>k.endsWith('_entity')).map(k=>this.config[k]).filter(v=>typeof v==='string'&&v));const connection=this._hass.connection;if(!connection?.subscribeEvents)return;this._unsub=connection.subscribeEvents(e=>{if(ids.has(e.data?.entity_id))this.render()},'state_changed');this.updateFromHass()}
+ async _unsubscribe(){const p=this._unsubPromise;this._unsubPromise=null;if(!p)return;try{const fn=await p;if(typeof fn==='function')fn()}catch(err){console.warn('Hot Tub Animated Card unsubscribe error',err)}}
+ async _restartSubscription(){if(this._subscribing)return;this._subscribing=true;try{await this._unsubscribe();if(!this._hass||!this.config?.pump_entity)return;const ids=new Set(Object.keys(this.config).filter(k=>k.endsWith('_entity')).map(k=>this.config[k]).filter(v=>typeof v==='string'&&v));const connection=this._hass.connection;if(!connection?.subscribeEvents)return;this._unsubPromise=connection.subscribeEvents(e=>{if(ids.has(e.data?.entity_id)){this.updateFromHass();this.render()}},'state_changed');this.updateFromHass()}finally{this._subscribing=false}}
  updateFromHass(){const e=this.stateObj(this.config?.pump_entity);if(e)this.apply(this.normalize(e.attributes?.preset_mode??e.state))}
  normalize(v){const s=String(v??'').toLowerCase().trim(),n=Number(s);if(['off','idle','unavailable','unknown','0'].includes(s))return'off';if(s.includes('high')||s.includes('boost')||s.includes('strong')||s==='hi'||(!Number.isNaN(n)&&n>=2))return'high';if(s.includes('low')||s.includes('medium')||s==='lo'||s==='on'||(!Number.isNaN(n)&&n>0))return'low';return'off'}
  asset(state){try{return new URL(`./svg/pump-${state}.svg`,import.meta.url).href}catch{return''}}
@@ -48,4 +49,4 @@ class HotTubCard extends HTMLElement{
  apply(s){this._state=['off','low','high'].includes(s)?s:'off';const img=this.shadowRoot.querySelector('#spaImage'),dot=this.shadowRoot.querySelector('#dot'),text=this.shadowRoot.querySelector('#state');if(img){const src=this.asset(this._state);if(src&&this._imgSrc!==src){this._imgSrc=src;img.src=src}}if(text)text.textContent='Pump '+this._state;if(dot)dot.className='dot '+(this._state==='off'?'':this._state)}
 }
 
-customElements.define('hot-tub-animated-ha-card',HotTubCard);window.customCards=window.customCards||[];window.customCards.push({type:'hot-tub-animated-ha-card',name:'Hot Tub Animated Card',preview:false,configurable:true,description:'Animated hot tub card with live spa activities and visual configuration.',documentationURL:'https://github.com/idarkside/hot_tub_animated_ha_card'});
+customElements.define('hot-tub-animated-ha-card',HotTubCard);window.customCards=window.customCards||[];if(!window.customCards.some(c=>c.type==='hot-tub-animated-ha-card'))window.customCards.push({type:'hot-tub-animated-ha-card',name:'Hot Tub Animated Card',preview:false,configurable:true,description:'Animated hot tub card with live spa activities and visual configuration.',documentationURL:'https://github.com/idarkside/hot_tub_animated_ha_card'});

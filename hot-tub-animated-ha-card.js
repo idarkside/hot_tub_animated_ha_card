@@ -9,7 +9,7 @@ class HotTubCard extends HTMLElement{
  getGridOptions(){return{rows:this.config?.show_activities?6:4,columns:6,min_rows:4,max_rows:8}}
  disconnectedCallback(){this._unsub?.();this._unsub=null}
  set hass(v){this._hass=v;if(this.config)this.subscribe()}
- subscribe(){this._unsub?.();if(!this._hass||!this.config)return;const ids=new Set(Object.keys(this.config).filter(k=>k.endsWith('_entity')).map(k=>this.config[k]).filter(Boolean));this._unsub=this._hass.connection.subscribeEvents(e=>{if(ids.has(e.data?.entity_id))this.render()},'state_changed');this.updateFromHass()}
+ subscribe(){this._unsub?.();if(!this._hass||!this.config)return;const ids=new Set(Object.keys(this.config).filter(k=>k.endsWith('_entity')).map(k=>this.config[k]).filter(Boolean));this._unsub=this._hass.connection.subscribeEvents(e=>{const id=e.data?.entity_id;if(!ids.has(id))return;if(id===this.config.pump_entity){const ns=e.data?.new_state;this.apply(this.normalize(ns?.attributes?.preset_mode??ns?.state));}else{this.render();}},'state_changed');this.updateFromHass()}
  updateFromHass(){const e=this._hass?.states?.[this.config.pump_entity];if(e)this.apply(this.normalize(e.attributes?.preset_mode??e.state))}
  normalize(v){const s=String(v??'').toLowerCase().trim(),n=Number(s);if(['off','idle','unavailable','unknown','0'].includes(s))return'off';if(s.includes('high')||s.includes('boost')||s.includes('strong')||s==='hi'||(!Number.isNaN(n)&&n>=2))return'high';if(s.includes('low')||s.includes('medium')||s==='lo'||s==='on'||(!Number.isNaN(n)&&n>0))return'low';return'off'}
  asset(state){return new URL(`./svg/pump-${state}.svg`,import.meta.url).href}

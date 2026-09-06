@@ -1,46 +1,62 @@
 # Hot Tub Animated Home Assistant Card
 
-A custom Home Assistant Lovelace card for an animated hot tub visual, built with inline HTML, CSS and SVG. No external or raster images are used by the card itself.
+A custom Home Assistant Lovelace card for an animated hot tub visual, built with HTML, CSS and animated SVG. No raster images are used by the card.
+
+[![Add to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=idarkside&repository=hot_tub_animated_ha_card&category=dashboard)
 
 ## Features
 
-- Animated hot tub rendered directly with SVG/CSS
-- Pump OFF mode: completely still, with animation and lights disabled
-- Pump LOW mode: gentle water movement, ripples and blue lighting
-- Pump HIGH mode: faster water movement, dense internal bubbles and synchronised colour-changing LEDs
+- Animated Wellis Shine 2 visual rendered with SVG
+- Three dedicated animated SVG states: OFF, LOW and HIGH
+- Pump OFF: completely still, with animation and lights disabled
+- Pump LOW: gentle water movement, ripples and blue lighting
+- Pump HIGH: fast water movement, dense internal bubbles and synchronised colour-changing LEDs
 - Bubbles stay clipped inside the tub shell
-- Bubble sources are distributed around the tub, including the corners
+- Bubble sources are distributed around the tub, including all four corners and other internal areas
+- Bubble movement varies in direction
 - Responsive Lovelace card layout
-- Uses a Home Assistant pump entity to control the animation
-- No iframe and no external image dependency
+- Uses a Home Assistant pump entity to select the animation state
+- No iframe and no raster image dependency
 
-## Screenshots
+## Animated SVG states
+
+The card now uses real animated SVG files rather than keeping the complete animation embedded in the JavaScript:
+
+- `svg/pump-off.svg` — still tub, no active effects
+- `svg/pump-low.svg` — gentle water movement and blue LEDs
+- `svg/pump-high.svg` — fast water movement, internal bubbles and synchronised colour-changing LEDs
+
+These are genuine SVG files containing their own CSS animations. The Home Assistant card switches between them as the pump entity changes state.
+
+## Preview
 
 ### Pump OFF
 
-![Pump OFF](images/pump-off.svg)
+![Pump OFF](svg/pump-off.svg)
 
 Completely still with the lighting and water effects disabled.
 
 ### Pump LOW
 
-![Pump LOW](images/pump-low.svg)
+![Pump LOW](svg/pump-low.svg)
 
 Gentle water movement with blue lighting and slower ripple effects.
 
 ### Pump HIGH
 
-![Pump HIGH](images/pump-high.svg)
+![Pump HIGH](svg/pump-high.svg)
 
 Fast water movement, synchronised colour-changing LEDs and dense bubbles.
 
-> The screenshot files are static documentation images; the card itself remains fully animated in Home Assistant.
+> GitHub may display animated SVG previews according to its own rendering behaviour. The same SVG files are used by the live Home Assistant card.
 
 ## Installation
 
-### HACS — Custom Repository
+### Add with HACS
 
-Until the card is available through the normal HACS store, add this repository as a custom repository:
+Use the button above to open the repository directly in HACS.
+
+If the button is not available, add the repository manually:
 
 1. Open **HACS** in Home Assistant.
 2. Go to **Frontend**.
@@ -50,19 +66,25 @@ Until the card is available through the normal HACS store, add this repository a
 
    `https://github.com/idarkside/hot_tub_animated_ha_card`
 
-6. Select **Lovelace** as the category.
+6. Select **Dashboard** as the category.
 7. Click **Add**.
 8. Find **Hot Tub Animated Card** and install it.
 9. Restart Home Assistant if requested.
-10. Add the card to your dashboard using the configuration below.
 
 ### Manual installation
 
-Download `hot-tub-animated-ha-card.js` and place it in:
+Download `hot-tub-animated-ha-card.js` and the `svg/` directory, then place them together under `/config/www/`.
 
-`/config/www/`
+For example:
 
-Then add it under **Settings → Dashboards → Resources**:
+```text
+/config/www/hot-tub-animated-ha-card.js
+/config/www/svg/pump-off.svg
+/config/www/svg/pump-low.svg
+/config/www/svg/pump-high.svg
+```
+
+Then add the card resource under **Settings → Dashboards → Resources**:
 
 ```yaml
 resources:
